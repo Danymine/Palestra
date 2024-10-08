@@ -1,0 +1,167 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AspNetUser> SignInManager
+@inject UserManager<AspNetUser> UserManager
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Palestra</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Palestra.styles.css" asp-append-version="true" />
+    <!-- CSS per aggiungere l'immagine di sfondo -->
+    <!-- CSS -->
+    <style>
+
+        .promo-section .text-primary {
+            color: #3a4757;
+        }
+
+        .promo-section h1 {
+            color: #3a4757;
+            font-size: 2.5rem;
+        }
+
+        .promo-card-title {
+            color: #3a4757;
+            font-size: 2rem;
+        }
+
+        .promo-section .btn-warning {
+            background-color: #f05865;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.25rem;
+        }
+
+        .button {
+            color: white;
+            background-color: #f05865;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.25rem;
+        }
+
+            .button:hover {
+                color: white;
+                background-color: #f12c3d;
+            }
+
+        .promo-section .btn-warning:hover {
+            background-color: #f12c3d;
+        }
+
+        .nav-link {
+            font-size: 18px;
+        }
+
+
+        .nav-link:hover {
+            font-weight: 500;
+        }
+
+        .card-body ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .card-body ul li {
+            display: flex; /* Usa Flexbox per allineare icona e testo */
+            align-items: center; /* Allinea verticalmente l'icona e il testo */
+            margin-bottom: 8px; /* Spaziatura tra gli elementi della lista */
+        }
+
+        .card-body ul li i {
+            min-width: 20px; /* Imposta una larghezza minima per le icone per allinearle */
+        }
+
+        .nav-pills .nav-link.active{
+            color: #fff;
+            background-color: #f05865;
+        }
+
+        .btn-primary{
+            color: #fff;
+            background-color: #f05865;
+            border-color: white;
+        }
+
+         .btn-primary:hover{
+            background-color: #f12c3d;
+            border-color: white;
+        }
+
+        .active {
+            color: white !important;
+        }
+
+        li > a{
+            color: #3a4757 !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="/images/logo.jfif" style="height: 3em; width: 3em;" /></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        @if (!SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <a href="@Url.Action("Index", "Home")#funzioni" class="nav-link text-dark">Potenzialità</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("Index", "Home")#piani" class="nav-link text-dark">Piani e Prezzi</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="" asp-action="">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="" asp-action="">Gestisci Clienti</a>
+                            </li>
+                        }
+                    </ul>
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer class="py-4">
+        <div class="container">
+            <div class="text-center mt-3">
+                <p>
+                    &copy; 2024 FitnessApp. Tutti i diritti riservati.
+                    <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f mx-2" style="color: #f05865;"></i></a>
+                    <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter mx-2" style="color: #f05865;"></i></a>
+                    <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram mx-2" style="color: #f05865;"></i></a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,55 @@
+﻿@model WebApplication2.Models.Schedum
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>Schedum</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="DataInizio" class="control-label"></label>
+                <input asp-for="DataInizio" class="form-control" />
+                <span asp-validation-for="DataInizio" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DataFine" class="control-label"></label>
+                <input asp-for="DataFine" class="form-control" />
+                <span asp-validation-for="DataFine" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Note" class="control-label"></label>
+                <input asp-for="Note" class="form-control" />
+                <span asp-validation-for="Note" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FkUtente" class="control-label"></label>
+                <input asp-for="FkUtente" class="form-control" />
+                <span asp-validation-for="FkUtente" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FkCliente" class="control-label"></label>
+                <input asp-for="FkCliente" class="form-control" />
+                <span asp-validation-for="FkCliente" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

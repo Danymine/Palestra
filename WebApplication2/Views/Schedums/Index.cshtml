@@ -1,0 +1,63 @@
+﻿@model IEnumerable<WebApplication2.Models.Schedum>
+
+@{
+    ViewData["Title"] = "Schede";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 d-flex justify-content-between">
+        Schede Clienti
+        <!-- Pulsante per aggiungere una nuova scheda -->
+        <a href="@Url.Action("Create", "Schedums")" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Aggiungi Scheda
+        </a>
+    </h2>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Data Inizio</th>
+                <th>Data Fine</th>
+                <th>Cliente</th>
+                <th>Note</th>
+                <!-- Colonne per Dettagli, Modifica, Cancellazione -->
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model)
+            {
+                <tr>
+                    <td>@row.DataInizio.ToString("dd/MM/yyyy")</td>
+                    <td>@row.DataFine?.ToString("dd/MM/yyyy")</td> <!-- Se DataFine è nullable -->
+                    <td>@row.FkClienteNavigation.Nome + " " + @row.FkClienteNavigation.Cognome</td>
+                    <td>@row.Note</td>
+
+                    <!-- Colonna per i dettagli -->
+                    <td>
+                        <a href="@Url.Action("Details", "Schedum", new { id = row.Id })" class="btn btn-info">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                    </td>
+
+                    <!-- Colonna per la modifica -->
+                    <td>
+                        <a href="@Url.Action("Edit", "Schedum", new { id = row.Id })" class="btn btn-warning">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </td>
+
+                    <!-- Colonna per la cancellazione -->
+                    <td>
+                        <a href="@Url.Action("Delete", "Schedum", new { id = row.Id })" class="btn btn-danger" onclick="return confirm('Sei sicuro di voler cancellare questa scheda?');">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
