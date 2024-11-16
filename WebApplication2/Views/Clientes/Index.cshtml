@@ -6,37 +6,66 @@
 }
 
 <div class="container mt-4">
-    <h2 class="mb-4 d-flex justify-content-between">
-        Clienti
-    </h2>
 
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-        Launch demo modal
-    </button>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="position: absolute; right: 10px; top: 10px;">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="position: absolute; right: 10px; top: 10px;">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <strong>Si sono verificati i seguenti errori di validazione:</strong>
+            <div>
+                @foreach (var error in TempData["ErrorMessage"].ToString().Split(','))
+                {
+                    <div>@error.Trim()</div>
+                }
+            </div>
+        </div>
+    }
+
+
+    <div class="row">
+        <div class="col-6">
+            <h2 class="mb-4">
+                Clienti
+            </h2>
+        </div>
+
+        <div class="d-flex col-6 justify-content-end align-items-center">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ClientesCreate" onclick="loadPartialViewAsync('/Clientes/Create')">
+                + Add
+            </button>
+        </div>
+    </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="ClientesCreate" tabindex="-1" role="dialog" aria-labelledby="ClientesCreateLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <h5 class="modal-title" id="ClientesCreateTitle">Crea Cliente</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <i class="fas fa-times" aria-hidden="true"></i>
                     </button>
                 </div>
-                <div class="modal-body">
-                    ...
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                <div class="modal-body" id="ClientesCreateBody">
                 </div>
             </div>
         </div>
     </div>
 
-    <table class="table">
+    <table class="d-none d-lg-table table">
         <thead>
             <tr>
                 <th>Nome e Cognome</th>
@@ -69,26 +98,156 @@
 
                     <!-- Colonna per i dettagli -->
                     <td>
-                        <a href="@Url.Action("Details", "Schedum", new { id = row.Id })" class="btn btn-info">
+                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#ClientesDetails" onclick="loadPartialViewAsync('/Clientes/Details/@row.Id')">
                             <i class="fas fa-info-circle"></i>
-                        </a>
+                        </button>
                     </td>
 
                     <!-- Colonna per la modifica -->
                     <td>
-                        <a href="@Url.Action("Edit", "Schedum", new { id = row.Id })" class="btn btn-warning">
+                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#ClientesEdit" onclick="loadPartialViewAsync('/Clientes/Edit/@row.Id')">
                             <i class="fas fa-edit"></i>
-                        </a>
+                        </button>
                     </td>
 
                     <!-- Colonna per la cancellazione -->
                     <td>
-                        <a href="@Url.Action("Delete", "Schedum", new { id = row.Id })" class="btn btn-danger" onclick="return confirm('Sei sicuro di voler cancellare questa scheda?');">
+                        <a href="javascript:void(0);" class="btn btn-danger" onclick="deleteRecord(@row.Id)">
                             <i class="fas fa-trash-alt"></i>
                         </a>
+                        <form id="deleteForm">
+                            @Html.AntiForgeryToken()
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="ClientesEdit" tabindex="-1" role="dialog" aria-labelledby="ClientesEditLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ClientesEditTitle">Modifica Cliente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="ClientesEditBody">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="ClientesDetails" tabindex="-1" role="dialog" aria-labelledby="ClientesDetailsLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ClientesDetailsTitle">Cliente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="ClientesDetailsBody">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="d-table d-lg-none table">
+        <thead>
+            <tr>
+                <th>Nome<span class="d-none d-sm-inline"> e Cognome</span></th>
+                <!-- Colonne per Dettagli, Modifica, Cancellazione -->
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model)
+            {
+                <tr>
+                    <td>@row.Nome @row.Cognome</td>
+
+                    <!-- Colonna per i dettagli -->
+                    <td>
+                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#ClientesDetails" onclick="loadPartialViewAsync('/Clientes/Details/@row.Id')">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                    </td>
+
+                    <!-- Colonna per la modifica -->
+                    <td>
+                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#ClientesEdit" onclick="loadPartialViewAsync('/Clientes/Edit/@row.Id')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+
+                    <!-- Colonna per la cancellazione -->
+                    <td>
+                        <a href="javascript:void(0);" class="btn btn-danger" onclick="deleteRecord(@row.Id)">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+<script>
+    function loadPartialViewAsync(route) {
+         let requestData = {};
+
+        if (route.includes("Edit") || route.includes("Details")) {
+
+            const match = route.match(/(\d+)$/);
+            if (match) {
+                requestData.id = match[1];
+                console.log(requestData.id);
+            }
+        }
+
+        $.ajax({
+            url: route,
+            type: 'GET',
+            data: requestData,
+            success: function (data) {
+
+                const parts = route.split('/');
+
+                const subRoute = parts[0] + parts[1] + parts[2];
+                $('#' + subRoute + 'Body').html(data);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(route);
+                console.error("Errore durante il caricamento del contenuto:", textStatus, errorThrown);
+                alert("Si è verificato un errore nel caricamento del contenuto: " + textStatus + " - " + errorThrown);
+            }
+        });
+    }
+
+    function deleteRecord(recordId) {
+        if (confirm('Sei sicuro di voler cancellare questa scheda?')) {
+            $.ajax({
+                url: '/Clientes/DeleteConfirmed',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': $('#deleteForm input[name="__RequestVerificationToken"]').val()
+                },
+                data: { id: recordId },
+                success: function (response) {
+                    window.location.href = response.redirectToUrl;
+                },
+                error: function (error) {
+                    // Errore: avvisa l'utente
+                    alert("Si è verificato un errore durante l'eliminazione del record.");
+                }
+            });
+        }
+    }
+
+</script>

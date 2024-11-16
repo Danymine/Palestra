@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication2.Models;
+using WebApplication2.Models.ModelsV;
+using WebApplication2.Services;
 
 namespace WebApplication2.Controllers
 {
@@ -24,13 +26,19 @@ namespace WebApplication2.Controllers
         // GET: Clientes
         public async Task<IActionResult> Index()
         {
-            if (User.Identity.IsAuthenticated) {
+            if (User?.Identity?.IsAuthenticated != true)
+            {
+                return Forbid();
+            }
 
+            if (!string.IsNullOrEmpty(User.Identity.Name))
+            {
                 var result = await _userManager.FindByNameAsync(User.Identity.Name);
-                if ( result != null ) {
+                if (result != null)
+                {
 
                     var user_id = result.Id;
-                    var clienti = _context.Clientes.Where(cl => cl.FkUtente == user_id ).ToList();
+                    var clienti = _context.Clientes.Where(cl => cl.FkUtente == user_id).ToList();
                     return View(clienti);
                 }
             }
@@ -54,15 +62,22 @@ namespace WebApplication2.Controllers
                 return NotFound();
             }
 
-            return View(cliente);
+            return PartialView("_Details", cliente);
         }
 
         // GET: Clientes/Create
-        public IActionResult Create()
+        public async Task<IActionResult> CreateAsync()
         {
-            var model = new Cliente();
-            ViewData["FkUtente"] = new SelectList(_context.Users, "Id", "Id");
-            return PartialView("_CreateCliente", model);
+            
+            var model = new ClientesV();
+            string? id = await AuthenticationService.TakeIdByAuthenticationUserAsync(User, _userManager);
+            if( id != null)
+            {
+                ViewData["FkUtente"] = id;
+                return PartialView("_CreateCliente", model);
+            }
+
+            return Forbid();
         }
 
         // POST: Clientes/Create
@@ -70,16 +85,34 @@ namespace WebApplication2.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Cognome,Email,HaveAccess,NumeroTelefono,FkUtente")] Cliente cliente)
+        public async Task<IActionResult> Create(ClientesV cliente)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(cliente);
+                Cliente cl = new Cliente
+                {
+                    Nome = cliente.Nome,
+                    Cognome = cliente.Cognome,
+                    Email = cliente.Email,
+                    HaveAccess = cliente.HaveAccess,
+                    NumeroTelefono = cliente.NumeroTelefono,
+                    FkUtente = cliente.FkUtente
+                };
+
+                _context.Add(cl);
                 await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Cliente creato con successo!";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["FkUtente"] = new SelectList(_context.Users, "Id", "Id", cliente.FkUtente);
-            return View(cliente);
+
+            // Popola l'ErrorMessage con i dettagli degli errori di validazione
+            var errorMessages = ModelState.Values.SelectMany(v => v.Errors)
+                                                 .Select(e => e.ErrorMessage)
+                                                 .ToList();
+
+            TempData["ErrorMessage"] =  string.Join(", ", errorMessages);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Clientes/Edit/5
@@ -95,8 +128,19 @@ namespace WebApplication2.Controllers
             {
                 return NotFound();
             }
-            ViewData["FkUtente"] = new SelectList(_context.Users, "Id", "Id", cliente.FkUtente);
-            return View(cliente);
+
+            ClientesV cl = new ClientesV
+            {
+                Nome = cliente?.Nome,
+                Cognome = cliente?.Cognome,
+                Email = cliente?.Email,
+                HaveAccess = cliente?.HaveAccess,
+                NumeroTelefono = cliente?.NumeroTelefono,
+                FkUtente = cliente?.FkUtente
+            };
+
+            ViewData["id"] = cliente.Id;
+            return PartialView("_Edit", cl);
         }
 
         // POST: Clientes/Edit/5
@@ -104,69 +148,59 @@ namespace WebApplication2.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Cognome,Email,HaveAccess,NumeroTelefono,FkUtente")] Cliente cliente)
+        public async Task<IActionResult> Edit(int id, ClientesV cliente)
         {
-            if (id != cliente.Id)
-            {
-                return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(cliente);
+                    var client = await _context.Clientes.FindAsync(id);
+                    if (client == null){
+
+                        return NotFound();
+                    }
+
+                    client.Nome = cliente.Nome;
+                    client.Cognome = cliente.Cognome;
+                    client.NumeroTelefono = cliente.NumeroTelefono;
+                    client.Email = cliente.Email;
+                    client.HaveAccess = cliente.HaveAccess;
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClienteExists(cliente.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound();
                 }
+
+                TempData["SuccessMessage"] = "Cliente aggiornato con successo!";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["FkUtente"] = new SelectList(_context.Users, "Id", "Id", cliente.FkUtente);
-            return View(cliente);
+
+            TempData["ErrorMessage"] = "Si è verificato un errore. Aggiornamento dati non effettuato.";
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Clientes/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // POST: Clientes/Delete/5
+        [HttpPost, ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var cliente = await _context.Clientes
-                .Include(c => c.FkUtenteNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
-
-            return View(cliente);
-        }
-
-        // POST: Clientes/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
             var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente != null)
+            string? idUser = await AuthenticationService.TakeIdByAuthenticationUserAsync(User, _userManager);
+            if (cliente != null && cliente.FkUtente == idUser)
             {
                 _context.Clientes.Remove(cliente);
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            TempData["SuccessMessage"] = "Cliente eliminato con successo!";
+            return Json(new { redirectToUrl = Url.Action("Index") });
         }
 
         private bool ClienteExists(int id)

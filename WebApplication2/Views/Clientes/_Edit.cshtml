@@ -1,58 +1,53 @@
-﻿@model WebApplication2.Models.Cliente
+﻿@model WebApplication2.Models.ModelsV.ClientesV
 
-@{
-    ViewData["Title"] = "Edit";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
 
-<h1>Edit</h1>
-
-<h4>Cliente</h4>
-<hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-12">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+            <input type="hidden" name="id" value='@ViewData["id"]' />
+            <div class="form-group">
+                <input asp-for="FkUtente" class="form-control" type="hidden"/>
+            </div>
             <div class="form-group">
                 <label asp-for="Nome" class="control-label"></label>
                 <input asp-for="Nome" class="form-control" />
                 <span asp-validation-for="Nome" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mt-2">
                 <label asp-for="Cognome" class="control-label"></label>
                 <input asp-for="Cognome" class="form-control" />
                 <span asp-validation-for="Cognome" class="text-danger"></span>
             </div>
-            <div class="form-group">
+
+            <div class="form-group mt-2">
                 <label asp-for="Email" class="control-label"></label>
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="HaveAccess" class="control-label"></label>
-                <input asp-for="HaveAccess" class="form-control" />
-                <span asp-validation-for="HaveAccess" class="text-danger"></span>
+          
+            <div class="form-group mt-2">
+                <span>Accesso al Servizio</span>
+                <div class="form-check">
+                    <input asp-for="HaveAccess" class="form-check-input" type="radio" value="true" id="HaveAccessTrue" />
+                    <label class="form-check-label" for="HaveAccessTrue">Si</label>
+                </div>
+                <div class="form-check">
+                    <input asp-for="HaveAccess" class="form-check-input" type="radio" value="false" id="HaveAccessFalse" />
+                    <label class="form-check-label" for="HaveAccessFalse">No</label>
+                </div>
             </div>
-            <div class="form-group">
+
+            <div class="form-group mt-2">
                 <label asp-for="NumeroTelefono" class="control-label"></label>
                 <input asp-for="NumeroTelefono" class="form-control" />
                 <span asp-validation-for="NumeroTelefono" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="FkUtente" class="control-label"></label>
-                <select asp-for="FkUtente" class="form-control" asp-items="ViewBag.FkUtente"></select>
-                <span asp-validation-for="FkUtente" class="text-danger"></span>
-            </div>
-            <div class="form-group">
+            <div class="form-group mt-2">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
